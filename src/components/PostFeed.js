@@ -2,43 +2,28 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import moment from "moment";
-
-const API_URL = `https://codaisseur-coders-network.herokuapp.com`;
+import { fetchNextPosts } from "../store/posts/actions";
+import { useDispatch, useSelector } from "react-redux";
+import { getPosts, postsLoading } from "../store/posts/selectors";
 
 export default function PostsFeed() {
-  const [data, setData] = useState({
-    loading: true,
-    posts: [],
-  });
+  const posts = useSelector(getPosts);
+  const loading = useSelector(postsLoading);
+  const dispatch = useDispatch();
 
-  async function fetchNext5Posts() {
-    setData({ ...data, loading: true });
-
-    // TODO
-    // fetch next set of posts (use offset+limit),
-    const response = await axios.get(
-      `${API_URL}/posts?offset=${data.posts.length}&limit=5`
-    );
-
-    //  and define the variable `morePosts`
-    const morePosts = response.data.rows;
-    console.log("more", morePosts);
-
-    setData({
-      loading: false,
-      posts: [...data.posts, ...morePosts],
-    });
+  async function fetchNext2Posts() {
+    dispatch(fetchNextPosts());
   }
 
   useEffect(() => {
-    fetchNext5Posts();
+    fetchNext2Posts();
   }, []);
 
   return (
     <div className='PostsFeed'>
       <h2>Recent posts</h2>
 
-      {data.posts.map(post => {
+      {posts.map(post => {
         return (
           <div key={post.id}>
             <h3>{post.title}</h3>
@@ -59,10 +44,10 @@ export default function PostsFeed() {
         );
       })}
       <p>
-        {data.loading ? (
+        {loading ? (
           <em>Loading...</em>
         ) : (
-          <button onClick={fetchNext5Posts}>Load more</button>
+          <button onClick={fetchNext2Posts}>Load more</button>
         )}
       </p>
     </div>
